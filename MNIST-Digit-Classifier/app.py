@@ -10,7 +10,7 @@ app = Flask(__name__)
 
 # -Load the trained TensorFlow model-
 # This file must be in the same folder as app.py
-model = tf.keras.models.load_model('model.h5')
+model = tf.keras.models.load_model('model.keras')
 
 # ---- Route: Homepage ----
 @app.route('/')
