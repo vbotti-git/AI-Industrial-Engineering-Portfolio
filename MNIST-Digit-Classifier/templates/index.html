@@ -1,1 +1,87 @@
+<!-- templates/index.html -->
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>MNIST Digit Classifier</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    canvas { border: 1px solid #000; }
+    #result { margin-top: 10px; font-size: 1.2rem; }
+  </style>
+</head>
+<body>
+  <h2>Draw a digit (0–9)</h2>
 
+  <!-- Drawing area -->
+  <canvas id="canvas" width="280" height="280"></canvas>
+  <br/>
+  <button id="clear">Clear</button>
+  <button id="predict">Predict</button>
+
+  <!-- Shows the server's prediction -->
+  <div id="result"></div>
+
+<script>
+  // Get canvas and drawing context
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+
+  // Fill background white
+  ctx.fillStyle = 'white';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Brush settings
+  ctx.lineWidth = 20;
+  ctx.lineCap = 'round';
+  ctx.strokeStyle = 'black';
+
+  // Track drawing state
+  let drawing = false;
+
+  // Start drawing when mouse pressed
+  canvas.addEventListener('mousedown', (e) => {
+    drawing = true;
+    const rect = canvas.getBoundingClientRect();
+    ctx.beginPath();
+    ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+  });
+
+  // Stop drawing on mouse up / leave
+  canvas.addEventListener('mouseup', () => drawing = false);
+  canvas.addEventListener('mouseout', () => drawing = false);
+
+  // Draw as mouse moves if drawing flag is true
+  canvas.addEventListener('mousemove', (e) => {
+    if (!drawing) return;
+    const rect = canvas.getBoundingClientRect();
+    ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+    ctx.stroke();
+  });
+
+  // Clear button
+  document.getElementById('clear').onclick = () => {
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    document.getElementById('result').innerText = '';
+  };
+
+  // Predict button: send image to server
+  document.getElementById('predict').onclick = async () => {
+    // Convert canvas content to data URL (base64 PNG)
+    const dataURL = canvas.toDataURL('image/png');
+
+    // Send POST request to /predict with JSON payload {image: dataURL}
+    const response = await fetch('/predict', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ image: dataURL })
+    });
+
+    // Parse JSON response like { prediction: 7 }
+    const result = await response.json();
+    document.getElementById('result').innerText = 'Prediction: ' + result.prediction;
+  };
+</script>
+</body>
+</html>
