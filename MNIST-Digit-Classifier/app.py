@@ -35,7 +35,7 @@ def predict():
     img = Image.open(io.BytesIO(img_bytes)).convert('L')
 
     # Resize to 28x28 pixels (the size MNIST expects)
-    img = img.resize((28, 28), Image.ANTIALIAS)
+    img = img.resize((28, 28), Image.Resampling.LANCZOS)
 
     # Convert image to numpy array (shape: 28x28)
     arr = np.array(img).astype('float32')
